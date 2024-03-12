@@ -25,10 +25,12 @@ const usePhoneBook: IUsePhoneBook = () => {
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     const target = e.target as typeof e.target & {
-      phone: { value: number };
+      phone: { value: string };
       name: { value: string };
     };
-    const person = { phone: target.phone.value, name: target.name.value };
+    const name = target.name.value.trim();
+    const phone = +target.phone.value.trim();
+    const person = { name, phone };
     createPerson(person);
   };
 
