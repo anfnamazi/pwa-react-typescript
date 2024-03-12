@@ -1,5 +1,6 @@
 import { FunctionComponent } from "react";
 import usePhoneBook from "./hooks/usePhoneBook";
+import { toString } from "./utils/PhoneBookUtils";
 
 interface PhoneBookProps {}
 
@@ -15,7 +16,7 @@ const PhoneBook: FunctionComponent<PhoneBookProps> = () => {
       <ul>
         {persons.map((person) => (
           <li>
-            {`${person.name}: ${person.phone}`}
+            {toString(person)}
             <button onClick={handleEdit(person.id, person)}>&#9998;</button>
             <button onClick={handleRemove(person.id)}>&#10006;</button>
           </li>

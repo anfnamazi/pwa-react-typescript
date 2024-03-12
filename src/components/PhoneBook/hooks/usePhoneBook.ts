@@ -7,6 +7,7 @@ import {
   postPerson,
 } from "../services/PhoneBookServices";
 import { IPerson, IReqPerson } from "../types/phoneBookTypes";
+import { toObject, toString } from "../utils/PhoneBookUtils";
 
 interface IUsePhoneBook {
   (): {
@@ -47,12 +48,9 @@ const usePhoneBook: IUsePhoneBook = () => {
   const editPerson = async (id: string, person: IPerson): Promise<void> => {
     const newInput = prompt(
       'Please enter changes with "name: phone" structure',
-      `${person.name}: ${person.phone}`
+      toString(person)
     );
-    const newPerson = {
-      name: newInput.split(":")[0].trim(),
-      phone: +newInput.split(":")[1].trim(),
-    };
+    const newPerson = toObject(newInput);
     const { status } = await patchPerson(id, newPerson);
     if (status === 200) {
       updatePersons();
