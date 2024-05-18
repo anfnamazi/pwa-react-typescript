@@ -1,8 +1,8 @@
 import "./App.css";
-import { PhoneBook } from "./components/PhoneBook";
+import { Todo } from "./components/Todo";
 
 function App() {
-  return <PhoneBook />;
+  return <Todo />;
 }
 
 export default App;
