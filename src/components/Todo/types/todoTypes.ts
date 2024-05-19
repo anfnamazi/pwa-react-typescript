@@ -3,3 +3,15 @@ export interface ITask {
   completed: boolean;
   date: number;
 }
+
+export enum SortEnum {
+  NONE,
+  DESC,
+  ASC,
+}
+
+export enum StatusEnum {
+  ALL = "ALL",
+  ACTIVE = "ACTIVE",
+  COMPLETED = "COMPLETED",
+}

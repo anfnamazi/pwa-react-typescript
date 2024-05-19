@@ -1,18 +1,33 @@
-import { SyntheticEvent, useState } from "react";
-import { ITask } from "../types/todoTypes";
+import { ChangeEventHandler, SyntheticEvent, useState } from "react";
+import { useDidUpdate } from "rooks";
+import { ITask, SortEnum, StatusEnum } from "../types/todoTypes";
 
 interface IUseTodo {
   (): {
     tasks: ITask[];
+    visibleTasks: ITask[];
+    sort: SortEnum;
     handleSubmit: (e: SyntheticEvent) => void;
     handleRemove: (date: number) => () => void;
+    handleChangeCheckbox: (
+      date: number
+    ) => ChangeEventHandler<HTMLInputElement>;
+    handleChangeSort: () => void;
+    SortCondition: () => string;
+    handleSort: () => void;
+    handleChangeStatus: (status: StatusEnum) => () => void;
   };
 }
 
 const useTodo: IUseTodo = () => {
+  /* #region States */
   const [tasks, setTasks] = useState<ITask[]>([]);
+  const [visibleTasks, setVisibleTasks] = useState<ITask[]>([]);
+  const [sort, setSort] = useState<SortEnum>(SortEnum.NONE);
+  const [status, setStatus] = useState<StatusEnum>(StatusEnum.ALL);
+  /* #endregion */
 
-  /* #region Create */
+  /* #region Funcs */
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     const target = e.target as typeof e.target & {
@@ -22,11 +37,9 @@ const useTodo: IUseTodo = () => {
     const date = Date.now();
     const task = { title, completed: false, date };
     setTasks((prev) => [...prev, task]);
+    target.todo.value = "";
   };
 
-  /* #endregion */
-
-  /* #region Delete */
   const handleRemove = (date: number) => {
     // use closure to enhance performance by avoiding from inline callback
     // can use different key like id or something else but i prefer to use date
@@ -34,9 +47,113 @@ const useTodo: IUseTodo = () => {
       setTasks((prev) => prev.filter((t) => t.date !== date));
     };
   };
+
+  const handleChangeCheckbox = (
+    date: number
+  ): ChangeEventHandler<HTMLInputElement> => {
+    return (e) => {
+      setTasks((prev) => {
+        const targetTask = prev.find((i) => i.date === date);
+        targetTask.completed = e.target.checked;
+        return [...prev];
+      });
+    };
+  };
+
+  /* #region Sort */
+  const handleChangeSort = () => {
+    setSort((prev) => {
+      switch (prev) {
+        case SortEnum.NONE:
+          return SortEnum.ASC;
+        case SortEnum.ASC:
+          return SortEnum.DESC;
+        case SortEnum.DESC:
+          return SortEnum.NONE;
+      }
+    });
+  };
+
+  const SortCondition = () => {
+    switch (sort) {
+      case SortEnum.NONE:
+        return "";
+      case SortEnum.ASC:
+        return "&#8593;";
+      case SortEnum.DESC:
+        return "&#8595;";
+    }
+  };
+
+  const handleSort = () => {
+    switch (sort) {
+      case SortEnum.NONE:
+        setVisibleTasks([...tasks]);
+        break;
+      case SortEnum.ASC:
+        setVisibleTasks(() => {
+          tasks.sort((a, b) => a.date - b.date);
+          return [...tasks];
+        });
+        break;
+      case SortEnum.DESC:
+        setVisibleTasks(() => {
+          tasks.sort((a, b) => b.date - a.date);
+          return [...tasks];
+        });
+        break;
+    }
+  };
   /* #endregion */
 
-  return { tasks, handleSubmit, handleRemove };
+  /* #region Status */
+  const handleChangeStatus = (status: StatusEnum) => {
+    return () => {
+      setStatus(status);
+    };
+  };
+
+  const handleFilterStatus = () => {
+    switch (status) {
+      case StatusEnum.ALL:
+        setVisibleTasks([...tasks]);
+        break;
+      case StatusEnum.ACTIVE:
+        setVisibleTasks(() => {
+          const filterd = tasks.filter((i) => !i.completed);
+          return [...filterd];
+        });
+        break;
+      case StatusEnum.COMPLETED:
+        setVisibleTasks(() => {
+          const filterd = tasks.filter((i) => i.completed);
+          return [...filterd];
+        });
+        break;
+    }
+  };
+  /* #endregion */
+  /* #endregion */
+
+  /* #region Life cycle */
+  useDidUpdate(() => {
+    handleSort();
+    handleFilterStatus();
+  }, [sort, tasks, status]);
+  /* #endregion */
+
+  return {
+    tasks,
+    visibleTasks,
+    sort,
+    handleSubmit,
+    handleRemove,
+    handleChangeCheckbox,
+    handleChangeSort,
+    SortCondition,
+    handleSort,
+    handleChangeStatus,
+  };
 };
 
 export default useTodo;
