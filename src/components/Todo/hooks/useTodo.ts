@@ -1,5 +1,5 @@
 import { ChangeEventHandler, SyntheticEvent, useState } from "react";
-import { useDidUpdate } from "rooks";
+import { useDidMount, useDidUpdate } from "rooks";
 import { ITask, SortEnum, StatusEnum } from "../types/todoTypes";
 
 interface IUseTodo {
@@ -7,6 +7,7 @@ interface IUseTodo {
     tasks: ITask[];
     visibleTasks: ITask[];
     sort: SortEnum;
+    status: StatusEnum;
     handleSubmit: (e: SyntheticEvent) => void;
     handleRemove: (date: number) => () => void;
     handleChangeCheckbox: (
@@ -140,12 +141,25 @@ const useTodo: IUseTodo = () => {
     handleSort();
     handleFilterStatus();
   }, [sort, tasks, status]);
+
+  useDidUpdate(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
+
+  useDidMount(() => {
+    const tasksStr = localStorage.getItem("tasks");
+    if (tasksStr) {
+      const tasks = JSON.parse(tasksStr);
+      setTasks(tasks);
+    }
+  });
   /* #endregion */
 
   return {
     tasks,
     visibleTasks,
     sort,
+    status,
     handleSubmit,
     handleRemove,
     handleChangeCheckbox,

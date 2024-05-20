@@ -6,6 +6,7 @@ interface TodoProps {}
 
 const Todo: FunctionComponent<TodoProps> = () => {
   const {
+    status,
     visibleTasks,
     handleSubmit,
     handleRemove,
@@ -41,7 +42,9 @@ const Todo: FunctionComponent<TodoProps> = () => {
       </ul>
       <div>
         {Object.values(StatusEnum).map((i) => (
-          <button onClick={handleChangeStatus(i)}>{i}</button>
+          <button disabled={status === i} onClick={handleChangeStatus(i)}>
+            {i}
+          </button>
         ))}
       </div>
     </>
