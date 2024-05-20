@@ -52,6 +52,9 @@ const Todo: FunctionComponent<TodoProps> = () => {
                 onChange={handleChangeCheckbox(task.date)}
               />
               {task.title}
+              <i style={{ marginLeft: 32 }}>
+                created at: {new Date(task.date).toLocaleString()}
+              </i>
               <button onClick={handleRemove(task.date)}>&#10006;</button>
             </li>
           ) : null
