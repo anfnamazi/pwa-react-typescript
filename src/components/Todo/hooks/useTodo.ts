@@ -1,4 +1,9 @@
-import { ChangeEventHandler, SyntheticEvent, useState } from "react";
+import {
+  ChangeEventHandler,
+  DragEventHandler,
+  SyntheticEvent,
+  useState,
+} from "react";
 import { useDidMount, useDidUpdate } from "rooks";
 import { ITask, SortEnum, StatusEnum } from "../types/todoTypes";
 
@@ -17,6 +22,7 @@ interface IUseTodo {
     SortCondition: () => string;
     handleSort: () => void;
     handleChangeStatus: (status: StatusEnum) => () => void;
+    updateDnDState: DragEventHandler<HTMLLIElement>;
   };
 }
 
@@ -134,6 +140,16 @@ const useTodo: IUseTodo = () => {
     }
   };
   /* #endregion */
+
+  /* #region Drag */
+  const updateDnDState: DragEventHandler<HTMLLIElement> = (e) => {
+    e.preventDefault();
+    console.log(e);
+
+    // Handle drop logic here (reorder the list)
+    // Update the state with the new order
+  };
+  /* #endregion */
   /* #endregion */
 
   /* #region Life cycle */
@@ -167,6 +183,7 @@ const useTodo: IUseTodo = () => {
     SortCondition,
     handleSort,
     handleChangeStatus,
+    updateDnDState,
   };
 };
 

@@ -14,6 +14,7 @@ const Todo: FunctionComponent<TodoProps> = () => {
     handleChangeSort,
     SortCondition,
     handleChangeStatus,
+    updateDnDState,
   } = useTodo();
   return (
     <>
@@ -29,7 +30,7 @@ const Todo: FunctionComponent<TodoProps> = () => {
       </div>
       <ul>
         {visibleTasks.map((task) => (
-          <li>
+          <li key={task.date} draggable onDragEnd={updateDnDState}>
             <input
               type="checkbox"
               checked={task.completed}
