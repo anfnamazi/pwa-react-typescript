@@ -22,7 +22,9 @@ interface IUseTodo {
     SortCondition: () => string;
     handleSort: () => void;
     handleChangeStatus: (status: StatusEnum) => () => void;
-    updateDnDState: DragEventHandler<HTMLLIElement>;
+    handleDrop: (targetTask: ITask) => DragEventHandler<HTMLLIElement>;
+    handleDragStart: (draggingTask: ITask) => DragEventHandler<HTMLLIElement>;
+    handleDragOver: DragEventHandler<HTMLLIElement>;
   };
 }
 
@@ -32,6 +34,7 @@ const useTodo: IUseTodo = () => {
   const [visibleTasks, setVisibleTasks] = useState<ITask[]>([]);
   const [sort, setSort] = useState<SortEnum>(SortEnum.NONE);
   const [status, setStatus] = useState<StatusEnum>(StatusEnum.ALL);
+  const [draggingTask, setDraggingTask] = useState<ITask>();
   /* #endregion */
 
   /* #region Funcs */
@@ -98,15 +101,15 @@ const useTodo: IUseTodo = () => {
         setVisibleTasks([...tasks]);
         break;
       case SortEnum.ASC:
-        setVisibleTasks(() => {
-          tasks.sort((a, b) => a.date - b.date);
-          return [...tasks];
+        setVisibleTasks((prev) => {
+          prev.sort((a, b) => a.date - b.date);
+          return [...prev];
         });
         break;
       case SortEnum.DESC:
-        setVisibleTasks(() => {
-          tasks.sort((a, b) => b.date - a.date);
-          return [...tasks];
+        setVisibleTasks((prev) => {
+          prev.sort((a, b) => b.date - a.date);
+          return [...prev];
         });
         break;
     }
@@ -119,44 +122,42 @@ const useTodo: IUseTodo = () => {
       setStatus(status);
     };
   };
-
-  const handleFilterStatus = () => {
-    switch (status) {
-      case StatusEnum.ALL:
-        setVisibleTasks([...tasks]);
-        break;
-      case StatusEnum.ACTIVE:
-        setVisibleTasks(() => {
-          const filterd = tasks.filter((i) => !i.completed);
-          return [...filterd];
-        });
-        break;
-      case StatusEnum.COMPLETED:
-        setVisibleTasks(() => {
-          const filterd = tasks.filter((i) => i.completed);
-          return [...filterd];
-        });
-        break;
-    }
-  };
   /* #endregion */
 
   /* #region Drag */
-  const updateDnDState: DragEventHandler<HTMLLIElement> = (e) => {
-    e.preventDefault();
-    console.log(e);
+  const handleDragStart = (
+    draggingTask: ITask
+  ): DragEventHandler<HTMLLIElement> => {
+    return (e) => {
+      setDraggingTask(draggingTask);
+      e.dataTransfer.setData("text/plain", "");
+    };
+  };
 
-    // Handle drop logic here (reorder the list)
-    // Update the state with the new order
+  const handleDrop = (targetTask: ITask): DragEventHandler<HTMLLIElement> => {
+    return (e) => {
+      if (!draggingTask) return;
+      // find index of dragging task & target task
+      const currentIndex = tasks.indexOf(draggingTask);
+      const targetIndex = tasks.indexOf(targetTask);
+      // swap dragging task with target task
+      if (currentIndex !== -1 && targetIndex !== -1) {
+        tasks.splice(currentIndex, 1);
+        tasks.splice(targetIndex, 0, draggingTask);
+        setTasks([...tasks]);
+      }
+    };
+  };
+
+  const handleDragOver: DragEventHandler<HTMLLIElement> = (e) => {
+    e.preventDefault();
   };
   /* #endregion */
   /* #endregion */
 
-  /* #region Life cycle */
   useDidUpdate(() => {
     handleSort();
-    handleFilterStatus();
-  }, [sort, tasks, status]);
+  }, [sort, tasks]);
 
   useDidUpdate(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
@@ -183,7 +184,9 @@ const useTodo: IUseTodo = () => {
     SortCondition,
     handleSort,
     handleChangeStatus,
-    updateDnDState,
+    handleDragStart,
+    handleDrop,
+    handleDragOver,
   };
 };
 
