@@ -101,15 +101,15 @@ const useTodo: IUseTodo = () => {
         setVisibleTasks([...tasks]);
         break;
       case SortEnum.ASC:
-        setVisibleTasks((prev) => {
-          prev.sort((a, b) => a.date - b.date);
-          return [...prev];
+        setVisibleTasks(() => {
+          tasks.sort((a, b) => a.date - b.date);
+          return [...tasks];
         });
         break;
       case SortEnum.DESC:
-        setVisibleTasks((prev) => {
-          prev.sort((a, b) => b.date - a.date);
-          return [...prev];
+        setVisibleTasks(() => {
+          tasks.sort((a, b) => b.date - a.date);
+          return [...tasks];
         });
         break;
     }
